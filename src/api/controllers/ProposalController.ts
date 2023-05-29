@@ -24,7 +24,7 @@ export class ProposalController {
         try {
             const { daoId } = req.params;
             const dao = await this.daoService.findOne(daoId);
-            if (daoId === undefined) throw new NotFoundError('DAO does not exist');
+            if (dao === undefined) throw new NotFoundError('DAO does not exist');
 
             const proposals = await this.proposalService.findByDAO(daoId);
 
@@ -38,7 +38,7 @@ export class ProposalController {
         try {
             const { daoId, proposalId } = req.params;
             const dao = await this.daoService.findOne(daoId);
-            if (daoId === undefined) throw new NotFoundError('DAO does not exist');
+            if (dao === undefined) throw new NotFoundError('DAO does not exist');
 
             const proposal = await this.proposalService.findOne(daoId, proposalId);
             if (proposal === undefined) throw new NotFoundError('Proposal does not exist');
