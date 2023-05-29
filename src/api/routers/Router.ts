@@ -13,6 +13,6 @@ export class Routers {
 
     public route() {
         this.router.use('/daos', new LogMiddleware().use, new DAORouter().router);
-        this.router.use('/proposals', new LogMiddleware().use, new ProposalRouter().router);
+        this.router.use('/daos/:daoId/proposals', new LogMiddleware().use, new ProposalRouter().router);
     }
 }

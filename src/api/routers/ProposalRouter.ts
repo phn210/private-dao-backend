@@ -66,10 +66,10 @@ export class ProposalRouter {
          *                     name:
          *                       type: string
          */
-        this.router.get('/proposals', (new ProposalController()).queryListProposals);
+        this.router.get('/', (new ProposalController()).queryListProposals);
 
-        this.router.get('/proposals/:proposalId', (new ProposalController()).queryOneProposal);
+        this.router.get('/:proposalId', (new ProposalController()).queryOneProposal);
 
-        this.router.post('/proposals', (new ProposalController()).createProposal);
+        this.router.post('/', (new ProposalController()).createProposal);
     }
 }

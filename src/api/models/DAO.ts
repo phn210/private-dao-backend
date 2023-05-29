@@ -1,7 +1,7 @@
 import { model, Schema } from 'mongoose';
 
 export interface IDAO {
-    _id?: string,           
+    _id: string,           
     name: string,
     status: string,
     description: string,

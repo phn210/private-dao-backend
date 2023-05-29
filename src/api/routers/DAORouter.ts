@@ -66,10 +66,10 @@ export class DAORouter {
          *                     name:
          *                       type: string
          */
-        this.router.get('/daos', (new DAOController()).queryListDAOs);
+        this.router.get('/', (new DAOController()).queryListDAOs);
 
-        this.router.get('/daos/:daoId', (new DAOController()).queryOneDAO);
+        this.router.get('/:daoId', (new DAOController()).queryOneDAO);
 
-        this.router.post('/daos', (new DAOController()).createDAO);
+        this.router.post('/', (new DAOController()).createDAO);
     }
 }
