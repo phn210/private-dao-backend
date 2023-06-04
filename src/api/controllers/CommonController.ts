@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import { BadRequestError } from '../errors/http/BadRequestError';
 import { NotFoundError } from '../errors/http/NotFoundError';
 
+import { getTree } from '../services/getTreeProofPath';
+
 export class CommonController {
 
     constructor() {
@@ -11,7 +13,9 @@ export class CommonController {
 
     public async fetchMerkleTree(req: Request, res: Response) {
         try {
-            res.send({})
+            let data = await getTree();
+            console.log(data)
+            res.status(200).send({data: data})
         } catch (error: any) {
             res.status(error.httpCode ?? 500).send(error);
         }

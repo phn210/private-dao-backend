@@ -1,0 +1,30 @@
+version: "3.6"
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodbtest
+    restart: always
+    expose:
+      - 27017
+    ports:
+      - 27017:27017
+    volumes:
+      # seeding scipts
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      # named volumes
+      - mongodb:/data/db
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: identity
+    
+    networks:
+      - test
+
+networks:
+  test:
+    driver: bridge
+volumes:
+  mongodb:

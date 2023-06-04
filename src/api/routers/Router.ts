@@ -3,6 +3,7 @@ import { LogMiddleware } from '../middlewares/LogMiddleware';
 
 import { DAOController } from "../controllers/DAOController";
 import { ProposalController } from "../controllers/ProposalController";
+import { CommonController } from '../controllers/CommonController';
 
 export class Routers {
     public router: Router;
@@ -24,5 +25,7 @@ export class Routers {
         this.router.get('/daos/:daoId/proposals/:proposalId', new LogMiddleware().use, (new ProposalController()).queryOneProposal);
 
         this.router.post('/daos/:daoId/proposals/', new LogMiddleware().use, (new ProposalController()).createProposal);
+
+        this.router.get('/tries', (new CommonController()).fetchMerkleTree);
     }
 }
