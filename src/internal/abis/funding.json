@@ -7,6 +7,11 @@
         "type": "address[]"
       },
       {
+        "internalType": "address",
+        "name": "_daoManager",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "_reserveFactor",
         "type": "uint256"
@@ -323,13 +328,6 @@
         "type": "address"
       }
     ],
-    "name": "addWhitelistedDAO",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "applyForFunding",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -379,6 +377,19 @@
         "internalType": "uint32",
         "name": "",
         "type": "uint32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "daoManager",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -477,6 +488,19 @@
   },
   {
     "inputs": [],
+    "name": "fundingRoundCounter",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "fundingRoundInProgress",
     "outputs": [
       {
@@ -529,6 +553,11 @@
       {
         "internalType": "uint64",
         "name": "finalizedAt",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "failedAt",
         "type": "uint64"
       }
     ],
@@ -658,90 +687,6 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
-        "name": "_requestID",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getM",
-    "outputs": [
-      {
-        "internalType": "uint256[][]",
-        "name": "",
-        "type": "uint256[][]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "_requestID",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getR",
-    "outputs": [
-      {
-        "internalType": "uint256[][]",
-        "name": "",
-        "type": "uint256[][]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "_requestID",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getRequest",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "distributedKeyID",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256[][]",
-            "name": "R",
-            "type": "uint256[][]"
-          },
-          {
-            "internalType": "uint256[][]",
-            "name": "M",
-            "type": "uint256[][]"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "result",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256",
-            "name": "respondedAt",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct IDKGRequest.Request",
-        "name": "",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "_distributedKeyID",
         "type": "uint256"
@@ -844,25 +789,6 @@
       }
     ],
     "name": "isKnownRoot",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "isWhitelistedDAO",
     "outputs": [
       {
         "internalType": "bool",

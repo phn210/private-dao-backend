@@ -26,6 +26,6 @@ export class Routers {
 
         this.router.post('/daos/:daoId/proposals/', new LogMiddleware().use, (new ProposalController()).createProposal);
 
-        this.router.get('/tries', (new CommonController()).fetchMerkleTree);
+        this.router.get('/merkle-tree', (new CommonController()).fetchMerkleTree);
     }
 }

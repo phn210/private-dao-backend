@@ -4,9 +4,9 @@ import * as db from './database';
 import env from './lib/env';
 
 const globleConfig: JobConfig = {
-    Network: "ethereum",
-    ChainID: 1,
-    RPC: "https://rpc.tenderly.co/fork/3e258fc0-0c6e-442c-aabb-be3bc939d8d3",
+    Network: "sepolia",
+    ChainID: 11155111,
+    RPC: "https://rpc.sepolia.org",
     ConfirmedBlocks: 1,
     Mullticall: "0x0000000000000000000000000",
 }
