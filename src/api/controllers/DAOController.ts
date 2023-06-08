@@ -23,22 +23,31 @@ export class DAOController {
     public async queryListDAOs(req: Request, res: Response) {
         try {
             const daos = await this.daoService.findAll();
+            let daosData: any = {};
             
-            if (!req.query.addresses) {
-                res.send({'daos': daos});
-                return;   
-            }
-            
-            const addresses = (req.query.addresses as string).toLowerCase().split(',');
             const daoManager = useDAOManager(this.chainId);
             const fundManager = useFundManager(this.chainId);
             if (daoManager === undefined) throw new NotFoundError("Can not found DAOManager contract");
             if (fundManager === undefined) throw new NotFoundError("Can not found FundManager contract");
             const numDAOs = await daoManager.daoCounter();
             const existedDAO = await Promise.all([...Array(Number(numDAOs)).keys()].map(async (index: number) => daoManager.daos(index)));
-            const selected = existedDAO.map((addr: string, index: number) => addresses.includes(addr.toLowerCase()) ? index : -1).filter(e => e >= 0);
 
-            res.send({'daos': daos.filter(dao => selected.includes(Number(dao._id)))});
+            if (!req.query.addresses) {
+                daosData["length"] = existedDAO.length;
+                await Promise.all(existedDAO.map((addr, index) => {
+                    daosData[addr] = daos[index]
+                }));
+                res.send({'daos': daosData});
+                return;   
+            }
+            
+            const addresses = (req.query.addresses as string).toLowerCase().split(',');
+            const selected = existedDAO.map((addr: string, index: number) => addresses.includes(addr.toLowerCase()) ? index : -1).filter(e => e >= 0);
+            
+            await Promise.all(selected.map(index => {daosData[existedDAO[index]] = daos[index]}));
+            daosData["length"] = selected.length;
+
+            res.send({'daos': daosData});
         } catch (error: any) {
             res.status(error.httpCode ?? 500).send(error);
         }

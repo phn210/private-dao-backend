@@ -9,7 +9,7 @@ export class DAOService {
     }
 
     public async findAll(): Promise<IDAO[]> {
-        return (await DAO.find()).map(e => e.toObject());
+        return (await DAO.find().sort({'_id': 1})).map(e => e.toObject());
     }
 
     public async save(dao: IDAO): Promise<IDAO> {
