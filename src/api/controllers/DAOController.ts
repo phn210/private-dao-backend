@@ -1,13 +1,16 @@
 import { Request, Response } from 'express';
+import ethers from 'ethers';
 
 import { IDAO } from '../models/DAO';
 import { DAOService } from '../services/DAOService';
 import { BadRequestError } from '../errors/http/BadRequestError';
 import { NotFoundError } from '../errors/http/NotFoundError';
+import { useFundManager, useDAOManager, useDAO } from '../../lib/networks/evm';
 
 export class DAOController {
 
     private daoService: DAOService;
+    private chainId: number = 11155111;
 
     constructor() {
         this.daoService = new DAOService();
@@ -21,7 +24,21 @@ export class DAOController {
         try {
             const daos = await this.daoService.findAll();
             
-            res.send({'daos': daos});
+            if (!req.query.addresses) {
+                res.send({'daos': daos});
+                return;   
+            }
+            
+            const addresses = (req.query.addresses as string).toLowerCase().split(',');
+            const daoManager = useDAOManager(this.chainId);
+            const fundManager = useFundManager(this.chainId);
+            if (daoManager === undefined) throw new NotFoundError("Can not found DAOManager contract");
+            if (fundManager === undefined) throw new NotFoundError("Can not found FundManager contract");
+            const numDAOs = await daoManager.daoCounter();
+            const existedDAO = await Promise.all([...Array(Number(numDAOs)).keys()].map(async (index: number) => daoManager.daos(index)));
+            const selected = existedDAO.map((addr: string, index: number) => addresses.includes(addr.toLowerCase()) ? index : -1).filter(e => e >= 0);
+
+            res.send({'daos': daos.filter(dao => selected.includes(Number(dao._id)))});
         } catch (error: any) {
             res.status(error.httpCode ?? 500).send(error);
         }
