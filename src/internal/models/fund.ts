@@ -1,4 +1,4 @@
-import mongoose, { model, Schema } from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 
 export interface FundDeposit {
     chainID: number;
@@ -30,6 +30,7 @@ export interface LeafInserted {
     txID: string;
     commitment: string;
     timestamp: number;
+    contract?: string;
 }
 
 const LeafInsertedSchema = new Schema<LeafInserted>({
@@ -40,12 +41,15 @@ const LeafInsertedSchema = new Schema<LeafInserted>({
     txID: { type: String, required: true },
     timestamp: { type: Number, required: true },
     commitment: { type: String, required: true },
+    contract: {Type: String},
 })
 
 LeafInsertedSchema.pre('save', function(next) {
   this.id += 1;
   next();
 });
+
+LeafInsertedSchema.index({ block: 1, logIndex: 1, chainID: 1 }, { unique: true });
 
 const FundModel = mongoose.model('Fund', FundDepositSchema)
 const LeafModel = mongoose.model('Leaf', LeafInsertedSchema)

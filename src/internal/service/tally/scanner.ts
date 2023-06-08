@@ -30,16 +30,21 @@ export class TallyJob extends Job {
             console.log("Start");
             await this.process();
             console.log("Done");
-            delay(3000);
+            await delay(this.localConfig.JobIntervalSec * 1000);
         }
     }
 
     private async process() {
         var syncingBlock = this.syncedBlock
         let data: LogData = await this.getLogs(syncingBlock)
-        if (data.leafEvent.length > 0) {
-            await this.save(data.leafEvent)
 
+        if (data.leafEvent.length > 0) {
+            try {
+                await this.save(data.leafEvent)
+            } catch (e){
+                console.log(`faild to save in db, err:  ${(e as Error).message}`)
+                return
+            }
         }
         this.syncedBlock = data.syncingBlock + 1;
     }
@@ -95,6 +100,7 @@ export class TallyJob extends Job {
                     txID: log.transactionHash,
                     commitment: log.topics[1],
                     timestamp: blockInfo.timestamp,
+                    contract: this.localConfig.Routers[0],
                 })
             }
             if (toBlock >= confirmedBlock) {
@@ -115,6 +121,11 @@ export class TallyJob extends Job {
 
     private async save(leafInserteds: LeafInserted[]) {
         console.log(leafInserteds)
-        await LeafModel.insertMany(leafInserteds);
+        LeafModel.insertMany(leafInserteds,{ordered: false}).catch(e => {
+            if ((e as any).code == 11000) {
+                return
+            }
+            throw e
+        });
     }
 }

@@ -7,7 +7,7 @@ const globleConfig: JobConfig = {
     Network: "sepolia",
     ChainID: 11155111,
     RPC: "https://rpc.sepolia.org",
-    ConfirmedBlocks: 1,
+    ConfirmedBlocks: 3,
     Mullticall: "0x0000000000000000000000000",
 }
 
