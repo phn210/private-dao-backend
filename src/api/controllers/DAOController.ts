@@ -78,14 +78,20 @@ export class DAOController {
             ]);
 
             const finalizedRounds = states.map((st, id) => Number(st) == 4 ? id : -1).filter(e => e >= 0);
-            let validDAOs = [...new Set(listsDAOs.map((list, id) => finalizedRounds.includes(id) ? list : []).flat())];
-            validDAOs = validDAOs.map(addr => addr.toLowerCase());
+            const fundedLists = listsDAOs.map((list, id) => finalizedRounds.includes(id) ? list : []);
+            const validDAOs = [...new Set(fundedLists.flat())].map(addr => addr);
 
-            const selected = existedDAO.map((addr: string, index: number) => validDAOs.includes(addr.toLowerCase()) ? index : -1).filter(e => e >= 0);
-            console.log(validDAOs, selected);            
+            const fundingHistory: {[key: string]: any} = {};
+            validDAOs.map(dao => {
+                Object.assign(fundingHistory, {[dao]: fundedLists.map((list, id) => list.includes(dao) ? id : -1).filter(e => e >= 0)});
+            });
+            const selected = existedDAO.map((addr: string, index: number) => validDAOs.includes(addr) ? index : -1).filter(e => e >= 0);        
             await Promise.all(selected.map(index => {
                 if (daos[index] === undefined) daosData[existedDAO[index]] = {};
                 else daosData[existedDAO[index]] = daos[index];
+                Object.assign(daosData[existedDAO[index]], {
+                    "fundingHistory": fundingHistory[existedDAO[index]]
+                });
             }));
             daosData["length"] = selected.length;
             
