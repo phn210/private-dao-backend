@@ -112,7 +112,15 @@ export class DAOController {
 
     public async createDAO(req: Request, res: Response) {
         try {
-            const dao: IDAO = req.body.dao;
+            const dao = req.body.dao;
+            dao._id = Number(dao.daoId);
+            
+            const daoManagerContract = useDAOManager(this.chainId);
+            if (daoManagerContract === undefined) throw new NotFoundError("Can not found DAOManager contract");
+
+            const daoAddress = await daoManagerContract.daos(dao._id);
+            dao.address = daoAddress || '';
+
             await this.daoService.save(dao);
 
             res.send({});

@@ -41,10 +41,11 @@ export class ProposalController {
             if (daoContract === undefined) throw new NotFoundError("Can not found DAO contract");
             
             // const numProposals = await daoContract.proposalCount();
-            const numProposals = 2;
+            const numProposals = 10;
             console.log(numProposals);
 
-            const proposalIds = (await Promise.all([...Array(Number(numProposals)).keys()].map(async (index: number) => daoContract.proposalIds(index)))).reverse();
+            const proposalIds = (await Promise.all([...Array(Number(numProposals)).keys()].map(async (index: number) => daoContract.proposalIds(index))))
+                                .filter(e => Number(e) != 0).reverse();
             const [existedProposals, states] = await Promise.all([
                 Promise.all(proposalIds.map(async (id: number) => daoContract.proposals(id))),
                 Promise.all(proposalIds.map(async (id: number) => daoContract.state(id)))   
@@ -89,8 +90,10 @@ export class ProposalController {
     public async createProposal(req: Request, res: Response) {
         try {
             const { daoId } = req.params;
-            const proposal: IProposal = req.body.proposal;
+            const proposal = req.body.proposal;
             if (daoId != proposal.daoId) throw new BadRequestError("DAO ID does not match");
+            proposal._id = `${proposal.daoId}-${proposal.proposalId}`;
+
             await this.proposalService.save(proposal);
             res.send({});
         } catch (error: any) {
