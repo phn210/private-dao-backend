@@ -16,6 +16,7 @@ export class DAOController {
         this.daoService = new DAOService();
 
         this.queryListDAOs = this.queryListDAOs.bind(this);
+        this.queryFundingHistory = this.queryFundingHistory.bind(this);
         this.queryOneDAO = this.queryOneDAO.bind(this);
         this.createDAO = this.createDAO.bind(this);
     }
@@ -35,7 +36,8 @@ export class DAOController {
             if (!req.query.addresses) {
                 daosData["length"] = existedDAO.length;
                 await Promise.all(existedDAO.map((addr, index) => {
-                    daosData[addr] = daos[index]
+                    if (daos[index] === undefined) daosData[addr] = {};
+                    else daosData[addr] = daos[index];
                 }));
                 res.send({'daos': daosData});
                 return;   
@@ -44,10 +46,50 @@ export class DAOController {
             const addresses = (req.query.addresses as string).toLowerCase().split(',');
             const selected = existedDAO.map((addr: string, index: number) => addresses.includes(addr.toLowerCase()) ? index : -1).filter(e => e >= 0);
             
-            await Promise.all(selected.map(index => {daosData[existedDAO[index]] = daos[index]}));
+            await Promise.all(selected.map(index => {
+                if (daos[index] === undefined) daosData[existedDAO[index]] = {};
+                else daosData[existedDAO[index]] = daos[index];
+            }));
             daosData["length"] = selected.length;
 
             res.send({'daos': daosData});
+        } catch (error: any) {
+            res.status(error.httpCode ?? 500).send(error);
+        }
+    }
+
+    public async queryFundingHistory(req: Request, res: Response) {
+        try {
+            const daos = await this.daoService.findAll();
+            let daosData: any = {};
+            
+            const daoManager = useDAOManager(this.chainId);
+            const fundManager = useFundManager(this.chainId);
+            if (daoManager === undefined) throw new NotFoundError("Can not found DAOManager contract");
+            if (fundManager === undefined) throw new NotFoundError("Can not found FundManager contract");
+            const [numDAOs, numFundingRounds] = await Promise.all([
+                daoManager.daoCounter(),
+                fundManager.fundingRoundCounter()
+            ]);
+            const [existedDAO, listsDAOs, states] = await Promise.all([
+                Promise.all([...Array(Number(numDAOs)).keys()].map(async (index: number) => daoManager.daos(index))),
+                Promise.all([...Array(Number(numFundingRounds)).keys()].map(async (index: number) => fundManager.getListDAO(index))),
+                Promise.all([...Array(Number(numFundingRounds)).keys()].map(async (index: number) => fundManager.getFundingRoundState(index)))
+            ]);
+
+            const finalizedRounds = states.map((st, id) => Number(st) == 4 ? id : -1).filter(e => e >= 0);
+            let validDAOs = [...new Set(listsDAOs.map((list, id) => finalizedRounds.includes(id) ? list : []).flat())];
+            validDAOs = validDAOs.map(addr => addr.toLowerCase());
+
+            const selected = existedDAO.map((addr: string, index: number) => validDAOs.includes(addr.toLowerCase()) ? index : -1).filter(e => e >= 0);
+            console.log(validDAOs, selected);            
+            await Promise.all(selected.map(index => {
+                if (daos[index] === undefined) daosData[existedDAO[index]] = {};
+                else daosData[existedDAO[index]] = daos[index];
+            }));
+            daosData["length"] = selected.length;
+            
+            res.send({"daos": daosData});
         } catch (error: any) {
             res.status(error.httpCode ?? 500).send(error);
         }
