@@ -34,7 +34,6 @@ export class DAOController {
             const existedDAO = await Promise.all([...Array(Number(numDAOs)).keys()].map(async (index: number) => daoManager.daos(index)));
 
             if (!req.query.addresses) {
-                daosData["length"] = existedDAO.length;
                 await Promise.all(existedDAO.map((addr, index) => {
                     if (daos[index] === undefined) daosData[addr] = {};
                     else daosData[addr] = daos[index];
@@ -50,7 +49,6 @@ export class DAOController {
                 if (daos[index] === undefined) daosData[existedDAO[index]] = {};
                 else daosData[existedDAO[index]] = daos[index];
             }));
-            daosData["length"] = selected.length;
 
             res.send({'daos': daosData});
         } catch (error: any) {
@@ -93,7 +91,6 @@ export class DAOController {
                     "fundingHistory": fundingHistory[existedDAO[index]]
                 });
             }));
-            daosData["length"] = selected.length;
             
             res.send({"daos": daosData});
         } catch (error: any) {
