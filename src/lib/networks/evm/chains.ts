@@ -34,8 +34,8 @@ const CHAINS: { [chainId: number]: BasicChainInformation } = {
         name: "ETH Testnet Sepolia",
         blockExplorerUrls: ['https://sepolia.etherscan.io'],
         rpcUrls: [
-            "https://rpc.sepolia.org",
             "https://rpc2.sepolia.org",
+            "https://rpc.sepolia.org",
             "https://eth-sepolia.public.blastapi.io"
         ],
         isTestnet: true

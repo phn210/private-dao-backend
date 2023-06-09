@@ -26,12 +26,12 @@ export class DAOController {
             const daos = await this.daoService.findAll();
             let daosData: any = {};
             
-            const daoManager = useDAOManager(this.chainId);
-            const fundManager = useFundManager(this.chainId);
-            if (daoManager === undefined) throw new NotFoundError("Can not found DAOManager contract");
-            if (fundManager === undefined) throw new NotFoundError("Can not found FundManager contract");
-            const numDAOs = await daoManager.daoCounter();
-            const existedDAO = await Promise.all([...Array(Number(numDAOs)).keys()].map(async (index: number) => daoManager.daos(index)));
+            const daoManagerContract = useDAOManager(this.chainId);
+            const fundManagerContract = useFundManager(this.chainId);
+            if (daoManagerContract === undefined) throw new NotFoundError("Can not found DAOManager contract");
+            if (fundManagerContract === undefined) throw new NotFoundError("Can not found FundManager contract");
+            const numDAOs = await daoManagerContract.daoCounter();
+            const existedDAO = await Promise.all([...Array(Number(numDAOs)).keys()].map(async (index: number) => daoManagerContract.daos(index)));
 
             if (!req.query.addresses) {
                 await Promise.all(existedDAO.map((addr, index) => {
@@ -61,18 +61,18 @@ export class DAOController {
             const daos = await this.daoService.findAll();
             let daosData: any = {};
             
-            const daoManager = useDAOManager(this.chainId);
-            const fundManager = useFundManager(this.chainId);
-            if (daoManager === undefined) throw new NotFoundError("Can not found DAOManager contract");
-            if (fundManager === undefined) throw new NotFoundError("Can not found FundManager contract");
+            const daoManagerContract = useDAOManager(this.chainId);
+            const fundManagerContract = useFundManager(this.chainId);
+            if (daoManagerContract === undefined) throw new NotFoundError("Can not found DAOManager contract");
+            if (fundManagerContract === undefined) throw new NotFoundError("Can not found FundManager contract");
             const [numDAOs, numFundingRounds] = await Promise.all([
-                daoManager.daoCounter(),
-                fundManager.fundingRoundCounter()
+                daoManagerContract.daoCounter(),
+                fundManagerContract.fundingRoundCounter()
             ]);
             const [existedDAO, listsDAOs, states] = await Promise.all([
-                Promise.all([...Array(Number(numDAOs)).keys()].map(async (index: number) => daoManager.daos(index))),
-                Promise.all([...Array(Number(numFundingRounds)).keys()].map(async (index: number) => fundManager.getListDAO(index))),
-                Promise.all([...Array(Number(numFundingRounds)).keys()].map(async (index: number) => fundManager.getFundingRoundState(index)))
+                Promise.all([...Array(Number(numDAOs)).keys()].map(async (index: number) => daoManagerContract.daos(index))),
+                Promise.all([...Array(Number(numFundingRounds)).keys()].map(async (index: number) => fundManagerContract.getListDAO(index))),
+                Promise.all([...Array(Number(numFundingRounds)).keys()].map(async (index: number) => fundManagerContract.getFundingRoundState(index)))
             ]);
 
             const finalizedRounds = states.map((st, id) => Number(st) == 4 ? id : -1).filter(e => e >= 0);

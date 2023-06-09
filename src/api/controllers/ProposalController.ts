@@ -5,11 +5,14 @@ import { DAOService } from '../services/DAOService';
 import { ProposalService } from '../services/ProposalService';
 import { BadRequestError } from '../errors/http/BadRequestError';
 import { NotFoundError } from '../errors/http/NotFoundError';
+import { useDAO, useDAOManager } from '../../lib/networks/evm';
+import { BigNumber, ethers } from 'ethers';
 
 export class ProposalController {
 
     private daoService: DAOService;
     private proposalService: ProposalService;
+    private chainId: number = 11155111;
 
     constructor() {
         this.daoService = new DAOService();
@@ -27,8 +30,42 @@ export class ProposalController {
             if (dao === undefined) throw new NotFoundError('DAO does not exist');
 
             const proposals = await this.proposalService.findByDAO(daoId);
+            let proposalsData: any = {};
 
-            res.send({'proposals': proposals});
+            const daoManagerContract = useDAOManager(this.chainId);
+            if (daoManagerContract === undefined) throw new NotFoundError("Can not found DAOManager contract");
+
+            const daoAddress = await daoManagerContract.daos(daoId);
+            
+            const daoContract = useDAO(this.chainId, daoAddress);
+            if (daoContract === undefined) throw new NotFoundError("Can not found DAO contract");
+            
+            // const numProposals = await daoContract.proposalCount();
+            const numProposals = 2;
+            console.log(numProposals);
+
+            const proposalIds = (await Promise.all([...Array(Number(numProposals)).keys()].map(async (index: number) => daoContract.proposalIds(index)))).reverse();
+            const [existedProposals, states] = await Promise.all([
+                Promise.all(proposalIds.map(async (id: number) => daoContract.proposals(id))),
+                Promise.all(proposalIds.map(async (id: number) => daoContract.state(id)))   
+            ]);
+
+            existedProposals.map((proposal, index) => {
+                proposalsData[existedProposals[index][0].toString()] = {
+                    ...proposals[index],
+                    ...{
+                        proposalId: existedProposals[index][0].toString(),
+                        state: Number(states[index]),
+                        forVotes: Number(existedProposals[index][1]),
+                        againstVotes: Number(existedProposals[index][2]),
+                        abstainVotes: Number(existedProposals[index][3]),
+                        proposers: existedProposals[index][4].toHexString()
+                    }
+                }
+                delete proposalsData[existedProposals[index][0].toString()]["_id"];
+            })
+
+            res.send({'proposals': proposalsData});
         } catch (error: any) {
             res.status(error.httpCode ?? 500).send(error);
         }
