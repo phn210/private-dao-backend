@@ -20,7 +20,7 @@ export class Routers {
 
         this.router.post('/daos', new LogMiddleware().use, (new DAOController()).createDAO);
 
-        this.router.get('/fundedDaos/', new LogMiddleware().use, (new DAOController()).queryFundingHistory);
+        this.router.get('/funded-daos/', new LogMiddleware().use, (new DAOController()).queryFundingHistory);
 
         this.router.get('/daos/:daoId/proposals', new LogMiddleware().use, (new ProposalController()).queryListProposals);
 
